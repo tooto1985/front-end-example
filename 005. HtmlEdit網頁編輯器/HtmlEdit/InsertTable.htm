@@ -1,0 +1,204 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>新增表格</title>
+</head>
+<body>
+<script type="text/javascript">
+    function create() {
+        var rows = document.getElementById("rows").value;
+        var cells = document.getElementById("cells").value;
+        var align = document.getElementById("align").options[document.getElementById("align").selectedIndex].value;
+        var bgcolor = document.getElementById("bgcolor").style.backgroundColor;
+        var width = document.getElementById("width").value;
+        var height = document.getElementById("height").value;
+        var widthunit = document.getElementById("widthunit").options[document.getElementById("widthunit").selectedIndex].value;
+        var heightunit = document.getElementById("heightunit").options[document.getElementById("heightunit").selectedIndex].value;
+        var border = document.getElementById("border").value;
+        var bordercolor = document.getElementById("bordercolor").style.backgroundColor;
+        var cellpadding = document.getElementById("cellpadding").value;
+        var cellspacing = document.getElementById("cellspacing").value;
+        var dotable = "";
+        if (rows == "") {
+            alert("沒有填寫表格列數!");
+            return false;
+        } else {
+            if (IsNumeric(rows) == false || rows=="0") {
+                alert("表格列數不是正確的數值!");
+                return false;            
+            }
+        }
+        if (cells == "") {
+            alert("沒有填寫表格欄數!");
+            return false;
+        } else {
+            if (IsNumeric(cells) == false || cells == "0") {
+                alert("表格欄數不是正確的數值!");
+                return false;
+            }
+        }
+        if (width != "") {
+            if (IsNumeric(width) == false || width == "0") {
+                alert("指定寬度不是正確的數值!");
+                return false;
+            }
+        }
+        if (height != "") {
+            if (IsNumeric(height) == false || height == "0") {
+                alert("指定高度不是正確的數值!");
+                return false;
+            }
+        }
+        if (border != "") {
+            if (IsNumeric(border) == false || border == "0") {
+                alert("框線大小不是正確的數值!");
+                return false;
+            }
+        }
+        if (cellpadding != "") {
+            if (IsNumeric(cellpadding) == false || cellpadding == "0") {
+                alert("儲存格與邊框距離不是正確的數值!");
+                return false;
+            }
+        }
+        if (cellspacing != "") {
+            if (IsNumeric(cellspacing) == false || cellspacing == "0") {
+                alert("儲存格間距不是正確的數值!");
+                return false;
+            }
+        }
+        dotable += "<table"
+        if (align != "") {
+            dotable += ' align="' + align + '"';
+        }
+        if (bgcolor != "") {
+            dotable += ' bgcolor="' + bgcolor + '"';
+        }
+        if (width != "") {
+            dotable += ' width="' + width + widthunit + '"';
+        }
+        if (height != "") {
+            dotable += ' height="' + height + heightunit + '"';
+        }
+        if (border != "") {
+            dotable += ' border="' + border + '"';
+        }
+        if (bordercolor != "") {
+            dotable += ' bordercolor="' + bordercolor + '"';
+        }
+        if (cellspacing != "") {
+            dotable += ' cellspacing="' + cellspacing + '"';
+        }
+        if (cellpadding != "") {
+            dotable += ' cellspacing="' + cellpadding + '"';
+        }
+        dotable += ">";
+        for (var i = 0; i < rows; i++) {
+            dotable += "<tr>";
+            for (var j = 0; j < cells; j++) {
+                dotable += "<td></td>";
+            }
+            dotable += "</tr>";
+        }
+        dotable += "</table>";
+        window.returnValue = dotable;
+        window.close();        
+    }
+    function IsNumeric(sText) {
+        var ValidChars = "0123456789";
+        var IsNumber=true;   
+        var Char;   
+        for (i = 0; i < sText.length && IsNumber == true; i++) {    
+            Char = sText.charAt(i);    
+            if (ValidChars.indexOf(Char) == -1) {   
+                IsNumber = false;   
+                }   
+        }   
+        return IsNumber;
+    }  
+</script>
+
+<table border="1" id="table2" bgcolor="#EFEFEF" cellspacing="0" cellpadding="0" bordercolordark="#FFFFFF" align="center">
+	<tr>
+		<td colspan="4" bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" height="30">
+		<font size="2" color="#333333">大小</font></td>
+	</tr>
+	<tr>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF"><font size="2" color="#333333">　表格列數：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+            <input type="text" size="3" value="2" id="rows"><font size="2" color="#333333">列</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF"><font size="2" color="#333333">　表格欄數：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+            <input type="text" size="3" value="2" id="cells"><font size="2" color="#333333">欄</font></td>
+	</tr>
+	<tr>
+		<td colspan="4" bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" height="30">
+		<font size="2" color="#333333">版面配置</font></td>
+	</tr>
+	<tr>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　對齊方式：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<font color="#333333"><select size="1" id="align">
+		<option value="">預設值</option>
+		<option value="right">靠右</option>
+		<option value="left">靠左</option>
+		<option value="center">置中</option>
+		</select></font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　指定寬度：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<font color="#333333"><input type="text" size="3" id="width"><select size="1" 
+                id="widthunit">
+		<option value="">像素</option>
+		<option value="%">百分比</option>
+		</select></font></td>
+	</tr>
+	<tr>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　背景顏色：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<input type="button" value="選取..." 
+                onclick="var fcolor=showModalDialog('SelectColor.htm',false,'dialogWidth:330px;dialogHeight:360px;status:0;');this.style.backgroundColor=fcolor;" 
+                id="bgcolor"></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　指定高度：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<font color="#333333"><input type="text" size="3" id="height"><select size="1" 
+                id="heightunit">
+		<option value="">像素</option>
+		<option value="%">百分比</option>
+		</select></font></td>
+	</tr>
+	<tr>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　框線大小：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<font color="#333333"><input type="text" size="3" value="1" id="border"><font size="2">像素</font></font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　邊框顏色：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<input type="button" value="選取..." 
+                onclick="var fcolor=showModalDialog('SelectColor.htm',false,'dialogWidth:330px;dialogHeight:360px;status:0;');this.style.backgroundColor=fcolor;" 
+                id="bordercolor"></td>
+	</tr>
+	<tr>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　儲存格與邊框距離：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<font color="#333333"><input type="text" size="3" id="cellpadding"><font size="2">像素</font></font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="left">
+		<font size="2" color="#333333">　儲存格間距：</font></td>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF">
+		<font color="#333333"><input type="text" size="3" id="cellspacing"><font size="2">像素</font></font></td>
+	</tr>
+	<tr>
+		<td bgcolor="#EFEFEF" bordercolorlight="#C0C0C0" bordercolordark="#FFFFFF" align="center" colspan="4" height="30">
+		<input type="button" value="取消" onclick="window.close();">
+		<input type="button" value="完成" onclick="create();"></td>
+	</tr>
+</table>
+
+</body>
+</html>

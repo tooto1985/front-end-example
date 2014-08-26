@@ -1,0 +1,115 @@
+<html>
+<head>
+<title>飛來訊產品記憶大考驗</title>
+<meta http-equiv="Content-Language" content="zh-tw">
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<meta property="og:title" content="飛來訊產品記憶大考驗" />
+<meta property="og:url" content="文章網址(可從資料庫撈出來)" />
+<meta property="og:image" content="圖片縮圖網址(可從資料庫撈出來)" />
+<meta property="og:description" content="文章描述(可從資料庫撈出來)"/>
+<meta property="og:site_name" content="網站名稱" />
+</head>
+<body>
+<div id="div1"></div>
+<script>
+var go,lock,cp,obj1,obj2,val1,val2;
+function init() {
+	var product=new Array(); //產品照片
+	product.push("images/product_01.jpg");
+	product.push("images/product_02.jpg");
+	product.push("images/product_03.jpg");
+	product.push("images/product_04.jpg");
+	product.push("images/product_05.jpg");
+	product.push("images/product_06.jpg");
+	product.push("images/logo_01.jpg");
+	product.push("images/logo_02.jpg");		
+	var count=product.length
+	for(var i=0;i<count;i++){
+		product.push(product[i]);
+	}
+	product.sort(function(){return Math.random()>0.5?-1:1;}); //隨機排列
+	var height=parseInt(Math.sqrt(product.length)); //陣列高度
+	while((product.length/height)%1!=0){height-=1;}; //取得最佳方形
+	var width=product.length/height; //陣列寬度
+	var html="<table border='0' cellpadding='0' cellspacing='0'>";
+	html+="<tr><td align='center' colspan='"+width+"'>";
+	html+="<span style='font-size:20px;'>飛來訊產品記憶大考驗</span>";
+	html+="</td></tr>";
+	
+	
+	for(var i=0;i<height;i++){
+		html+="<tr>";
+		for(var j=0;j<width;j++){
+			html+="<td width='120' height='120'";
+			html+=" style='background-image:url("+ product[parseInt((i*width)+j)] +");background-repeat:no-repeat;background-position: 10 10px;'>";
+			html+="<input type='button' style='width:120px;height:120px;font-size:80px;font-family:\"Arial Unicode MS\";line-height:1;' value='？' onclick='onopen(this,\""+product[parseInt((i*width)+j)]+"\","+product.length+")'>";
+			html+="</td>";
+		}
+		html+="</tr>";
+	}
+	html+="<tr><td align='center' colspan='"+width+"'>";
+	html+="<span id='times' style='font-size:20px;'></span><br>";
+	html+="<input type='button' value='重新挑戰' onclick='reset();'></td></tr>";
+	document.getElementById("div1").innerHTML=html;
+}
+function onopen(obj,val,max){
+	if(go==null){go=1;start("times",0);}
+	if(lock==null){
+		obj.style.display="none";
+		if(obj1==null){
+			obj1=obj;
+			val1=val;
+		} else {
+			obj2=obj;
+			val2=val;
+			if(val1!=val2){
+				lock=1;
+				setTimeout(function(){
+					obj1.style.display="";
+					obj2.style.display="";
+					obj1=null;
+					obj2=null;
+					val1=null;
+					val2=null;
+					lock=null;
+				},500);
+			}
+			else {
+				obj1=null;
+				obj2=null;
+				val1=null;
+				val2=null;
+				if(cp==null){cp=0};
+				cp+=2;
+			}
+			if(cp==max){
+				alert("恭喜你完成了");
+				go=null;
+			}
+		}
+	}
+}
+function start(objid,t){
+	if(go==1){
+		if(t==null){t=0};
+		document.getElementById(objid).innerHTML="挑戰時間："+t.toFixed(1)+"秒";
+		t+=0.1;
+		setTimeout("start('"+objid+"',"+t+")",100);
+	}
+}
+function reset() {
+	go=null;
+	lock=null;
+	cp=null;
+	obj1=null;
+	obj2=null;
+	val1=null;
+	val2=null;
+	init();
+}
+reset();
+</script>
+
+
+</body>
+</html>

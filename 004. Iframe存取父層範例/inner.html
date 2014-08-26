@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #scrollcolor
+        {
+            height: 200px;
+            width: 200px;
+            border: 1px solid;
+            overflow-y: scroll;
+            background-color: pink;
+        }
+
+        #debug
+        {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+        }
+    </style>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script src="https://rawgithub.com/tooto1985/library/master/tommy.js"></script>
+    <script>
+        function map(value, fromLow, fromHigh, toLow, toHigh) {
+            return (toHigh - toLow) / ((fromHigh - fromLow) / value);
+        }
+        
+        function UseIframe() {
+            var par = typeof (window.parent) != 'undefined' ? window.parent : null;
+            if (par && par != window) {
+                return true;
+            } else {
+                return false;
+            }
+        }  //判斷是否使用Iframe
+
+        $(function() {
+            $("#scrollcolor").scroll(function() {
+
+                function gethex(value) {
+                    var n = parseInt(map(value, 0, 800, 0, 255), 10).toString(16).toUpperCase();
+                    return n.length == 1 ? "0" + n : n;
+                }
+
+                var hex = gethex($("#scrollcolor").scrollTop());
+
+                $("#debug").text($("#scrollcolor").scrollTop() + "/" + hex + "/");
+                $("#scrollcolor").css({ "background-color": "#" + hex + hex + hex });
+
+                if (UseIframe()) {
+                    window.parent.document.body.style.backgroundColor="#" + hex+hex+hex;
+                }
+            });
+        });
+    </script>
+    <meta charset="utf-8" />
+    <title>JS Bin</title>
+</head>
+<body>
+    <div id="scrollcolor">
+        <div style="height: 1000px"></div>
+        <div id="debug"></div>
+    </div><br/>
+    沒有iframe
+</body>
+</html>

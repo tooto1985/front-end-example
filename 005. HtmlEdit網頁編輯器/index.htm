@@ -1,0 +1,28 @@
+<form action="index.htm" method="get">
+<body>
+<table>
+	<tr>
+		<td><textarea name="textarea1"></textarea></td>
+		<td><textarea name="textarea2"></textarea></td>
+	</tr>
+</table>
+<input type="submit">
+</body>
+</form>
+<script src="HtmlEdit/HtmlEdit.js"></script>
+<script>
+/*
+var HtmlEdit1 = new HtmlEdit();
+HtmlEdit1.path("HtmlEdit/"); //設定路徑
+HtmlEdit1.width(250); //設定寬度
+HtmlEdit1.height(250); //設定高度
+HtmlEdit1.control(document.getElementsByName("textarea1")[0]); //設定控制項
+*/
+ var he1=new HtmlEdit();he1.control(document.getElementsByName("textarea1")[0]);
+/*
+HtmlEdit2.path("HtmlEdit/"); //設定路徑
+HtmlEdit2.width(150); //設定寬度
+HtmlEdit2.height(350); //設定高度
+HtmlEdit2.control(document.getElementsByName("textarea2")[0]); //設定控制項
+*/
+</script>

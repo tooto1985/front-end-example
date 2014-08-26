@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.out {
+  width:400px
+}
+
+.box {
+  width:100px;
+  height:100px;
+  background-color:#efefef;
+  float:left;
+  margin-right:10px;
+  margin-bottom:10px;
+  overflow: hidden;
+}
+
+.mask {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: green;
+}
+</style>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script>
+$(function(){
+	$(".box").on("mouseenter mouseleave",function(e) {
+	  var getDirection = getMouseDirection(e);
+	  if (e.type==="mouseenter") {
+		$(this).append("<div class=\"mask\"></div>");
+		var $mask = $(".mask");
+		var css={};
+		switch (getDirection){
+		  case 0: css = {"top":"-100%","left":"0%"}; break;
+		  case 1: css = {"top":"0%","left":"100%"}; break;     
+		  case 2: css = {"top":"100%","left":"0%"}; break;  
+		  default: css = {"top":"0%","left":"-100%"}; break;          
+		}
+		$mask.css(css).animate({"top":"0%","left":"0%"},"fast");
+	  } else {
+		var $mask = $(".mask");
+		var css={};
+		switch (getDirection){
+		  case 0: css = {"top":"-100%","left":"0%"}; break;
+		  case 1: css = {"top":"0%","left":"100%"}; break;     
+		  case 2: css = {"top":"100%","left":"0%"}; break;  
+		  default: css = {"top":"0%","left":"-100%"}; break;          
+		}
+		$mask.animate(css,"fast",function() {
+		  $(this).remove();
+		});
+	  } 
+	});
+
+	//0=up,1=right,2=down,3=left
+	function getMouseDirection (event) {
+	  var $el = $(event.currentTarget),
+		  offset = $el.offset(),
+		  w = $el.outerWidth(),
+		  h = $el.outerHeight(),
+		  x = (event.pageX - offset.left - w / 2) * ((w > h)? h / w: 1),
+		  y = (event.pageY - offset.top - h / 2) * ((h > w)? w / h: 1),
+		  direction = Math.round((Math.atan2(y, x) * (180 / Math.PI) + 180) / 90  + 3) % 4;
+	  return direction;
+	}
+
+});
+</script>
+<meta charset=utf-8 />
+<title>JS Bin</title>
+</head>
+<body>
+<div class="out">
+  <div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+  </div>
+  <div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+  </div>
+  <div>
+    <div class="box"></div>
+    <div class="box"></div>
+    <div class="box"></div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+﻿<html>
+<head>
+    <title>顏色選取</title>
+</head>
+<body>
+<table border="1" cellspacing="0" id="table1" style="border-collapse: collapse">
+	<tr>
+		<td><div id="pannel1"></div></td>
+		<td height="100%"><div id="pannel2"></div></td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center">
+			<table border="0" height="30">
+				<tr>
+					<td><tt><font size="2"><div id="selectedTitle">請選取顏色</div></font></tt></td>				
+					<td><div style="width:20px;height:20px" id="selected"></div></td>
+					<td><tt><font size="2"><div id="selectedName"></div></font></tt></td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+<script>
+    function num(n) {
+        if (n > 255) {
+            return 255;
+        } else if (n < 0) {
+            return 0;
+        } else {
+            return n;
+        }
+    }
+    function right(sText, n) {
+        if (n <= 0)
+            return "";
+        else if (n > sText.length)
+            return sText;
+        else {
+            var iLen = sText.length;
+            return sText.substring(iLen, iLen - n);
+        }
+    }
+    function color(r, g, b) {
+        var count = 255;
+        var tb = "";
+        tb += ('<table border="0" cellpadding="0" cellspacing="0" width="255" height="255">');
+        for (var i = 255; i >= -1; i -= 8) {
+            for (var j = 255; j >= -1; j -= 8) {
+                if (count == 255) {
+                    tb += ("<tr>");
+                }
+                var _r = "right('0'+num(j-(255-i)).toString(16),2)";
+                if (r != 0) {
+                    _r = "right('0'+num(i-Math.round((255-j)*((255-r)/256))).toString(16),2)";
+                }
+                var _g = "right('0'+num(j-(255-i)).toString(16),2)";
+                if (g != 0) {
+                    _g = "right('0'+num(i-Math.round((255-j)*((255-g)/256))).toString(16),2)";
+                }
+                var _b = "right('0'+num(j-(255-i)).toString(16),2)";
+                if (b != 0) {
+                    _b = "right('0'+num(i-Math.round((255-j)*((255-b)/256))).toString(16),2)";
+                }
+                tb += ('<td bgcolor="#' + eval(_r) + eval(_g) + eval(_b) + '" onclick="SelectColor(\'#' + eval(_r) + eval(_g) + eval(_b) + '\')" onmouseover="SelectedIn(\'#' + eval(_r) + eval(_g) + eval(_b) + '\')" onmouseout="SelectedOut()"></td>');
+                if (count <= -1) {
+                    tb += ("</tr>");
+                    count = 255;
+                } else {
+                    count -= 8;
+                }
+            }
+        }
+        tb += ("</table>");
+        return tb;
+    }
+    function colorstyle() {
+        var tb = "";
+        tb += '<table border="0" cellspacing="0" cellpadding="0" width="20" style="height:255px;">';
+        for (var i = 0; i < 255; i += 8) {
+            tb += '<tr><td bgcolor="#FF00' + right('0' + i.toString(16), 2) + '" onclick="change(255,0,' + i + ')"></td></tr>';
+        }
+        for (var i = 255; i > 0; i -= 8) {
+            tb += '<tr><td bgcolor="#' + right('0' + i.toString(16), 2) + '00FF" onclick="change(' + i + ',0,255)"></td></tr>';
+        }
+        for (var i = 0; i < 255; i += 8) {
+            tb += '<tr><td bgcolor="#00' + right('0' + i.toString(16), 2) + 'FF" onclick="change(0,' + i + ',255)"></td></tr>';
+        }
+        for (var i = 255; i > 0; i -= 8) {
+            tb += '<tr><td bgcolor="#00FF' + right('0' + i.toString(16), 2) + '" onclick="change(0,255,' + i + ')"></td></tr>';
+        }
+        for (var i = 0; i < 255; i += 8) {
+            tb += '<tr><td bgcolor="#' + right('0' + i.toString(16), 2) + 'FF00" onclick="change(' + i + ',255,0)"></td></tr>';
+        }
+        for (var i = 255; i > 0; i -= 8) {
+            tb += '<tr><td bgcolor="#FF' + right('0' + i.toString(16), 2) + '00" onclick="change(255,' + i + ',0)"></td></tr>';
+        }
+        tb += '</table>';
+        return tb;
+    }
+    function change(r, g, b) {
+        document.getElementById("pannel1").innerHTML = color(r, g, b);
+    }
+    function SelectColor(c) {
+        window.returnValue = c;
+        window.close();
+    }
+    function SelectedIn(color) {
+        document.getElementById("selectedTitle").innerText = "目前所選取的顏色是 :";
+        document.getElementById("selected").style.backgroundColor = color;
+        document.getElementById("selectedName").innerText = color;
+    }
+    function SelectedOut() {
+        document.getElementById("selectedTitle").innerText = "請選取顏色";
+        document.getElementById("selected").style.backgroundColor = "";
+        document.getElementById("selectedName").innerText = "";
+    }
+    document.getElementById("pannel1").innerHTML = color(255, 0, 0);
+    document.getElementById("pannel2").innerHTML = colorstyle();
+</script>
+</body>
+</html>

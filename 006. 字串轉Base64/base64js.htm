@@ -1,0 +1,434 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<title>Base64與16進制Unicode/UTF8/BIG5轉碼</title>
+<script language=javascript>
+var b64ch = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+//var b64ch = "STUVWXYZabcdefghiABCDEFGHIJKLMNOPQRjklmnopqrst456789+/uvwxyz0123";
+var hexch = "0123456789ABCDEF";
+var ASCII=0,UCLE=1,UCBE=2,UTF8=3,BIG5=4,BigEndian=false;
+function base64Decode(b64, enc)
+{
+   var i, j;
+   var c = [0,0,0,0];  // base64 index
+   var cba = [];       // unicode byte array
+   var ch;             // single character
+   for (j=0; ; ) {
+      for (i=0; i<4 && j<b64.length; j++) {
+         ch = b64.charAt(j);
+         if (ch == '=')
+            c[i] = 0;
+         else if (/[a-z0-9+/]/i.test(ch))
+            c[i++] = b64ch.indexOf(ch);
+      }
+      if (i>0) cba.push((c[0] << 2 | c[1] >>> 4) & 0xff);
+      if (i>1) cba.push((c[1] << 4 | c[2] >>> 2) & 0xff);
+      if (i>2) cba.push((c[2] << 6 | c[3]) & 0xff);
+      if (i<4) break;
+   }
+   return joinFromArray(cba, enc);
+}
+function base64Encode(str, enc, flag)
+{
+   var i;
+   var b = [0,0,0];  // character code
+   var cba;          // character code byte array
+   var b64 = "";     // base64 string
+   var len;          // length of base64 string
+   cba = splitToArray(str, enc);
+   for (len=0; ; ) {
+      b[0] = b[1] = b[2] = 0;
+      for (i=0; i<3 && cba.length>0; i++)
+         b[i] = cba.shift();
+      if (i==0) break;
+      b64 += b64ch.charAt((b[0] >>> 2) & 0x3f).toString();
+      b64 += b64ch.charAt((b[0] << 4 | b[1] >>> 4) & 0x3f).toString();
+      b64 += i>1 ? b64ch.charAt((b[1] << 2 | b[2] >>> 6) & 0x3f).toString() : '=';
+      b64 += i>2 ? b64ch.charAt(b[2] & 0x3f).toString() : '=';
+      len += 4;
+      if (flag && len%76==0) b64 += "\r\n";
+   }
+   return b64;
+}
+function joinFromArray(cba, enc)
+{
+   var ucb = [];  // unicode/utf8 bytes
+   var b, u;      // the first byte
+   while (cba.length>0) {
+      b = cba.shift();
+      switch (enc) {
+      case UTF8:
+         if (b == 0) continue;
+         u = b;  // 0xxxxxxx
+         if (b > 0xc0) {  // 110xxxxx 10xxxxxx
+            u = (u & 0x1f) << 6 | cba.shift() & 0x3f;
+            if (b >= 0xe0) {  // 1110xxxx 10xxxxxx 10xxxxxx
+               u = (u & 0x3ff) << 6 | cba.shift() & 0x3f;
+               if (b >= 0xf0) {  // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+                  u = (u & 0x7fff) << 6 | cba.shift() & 0x3f;
+                  if (b >= 0xf8) {  // 111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+                     u = (u & 0xfffff) << 6 | cba.shift() & 0x3f;
+                     if (b >= 0xfc)  // 111111xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+                        u = (u & 0x3ffffff) << 6 | cba.shift() & 0x3f;
+         }  }  }  }
+         break;
+      case UCBE: u = b << 8 | cba.shift();
+         break;
+      case UCLE: u = b | cba.shift() << 8;
+         break;
+      case BIG5:  if (b > 127) { b = b << 8 | cba.shift(); }
+         u = big5char(b);
+         break;
+      }
+      ucb.push(u);
+   }
+   return enc == BIG5 ? ucb.join('') : String.fromCharCode.apply(null,ucb);
+}
+function splitToArray(str, enc)
+{
+   var i;
+   var cba = [];  // character code byte array
+   var ch;        // single character
+   for (i=0; i<str.length; i++) {
+      ch = str.charCodeAt(i);
+      switch (enc) {
+      case UTF8:
+         if (ch > 0x007f) {
+            ch = parseInt(encodeURI(str.charAt(i)).replace(/%/g,''),16);
+            if (ch > 0x07ff) cba.push((ch >>> 16) & 0xff);
+            cba.push((ch >>> 8) & 0xff);
+         }
+         cba.push(ch & 0xff);
+         break;
+      case UCBE:
+         cba.push((ch >>> 8) & 0xff);
+         cba.push(ch & 0xff);
+         break;
+      case UCLE:
+         cba.push(ch & 0xff);
+         cba.push((ch >>> 8) & 0xff);
+         break;
+      case BIG5: ch = big5code(str.charAt(i));
+         if (ch > 127) cba.push((ch >>> 8) & 0xff);
+         cba.push(ch & 0xff);
+      }
+   }
+   return cba;
+}
+function hexToStr(hst, enc)
+{
+   var i;
+   var hca = [];  // hexadecimal character array
+   var lead;      // leading byte flag
+   var hex = "";  // character code hexadecimal
+   var ch;        // single character
+   hst=hst.replace(/[^0-9A-F]/ig,"");
+   for (i=0; i<hst.length; i++) {
+      hex += hst.charAt(i).toString();
+      if (hex.length==2) {
+         hca.push(parseInt(hex,16) & 0xff);
+         hex="";
+      }
+   }
+   return joinFromArray(hca, enc);
+}
+function strToHex(str, enc, flag)
+{
+   var i;
+   var len;       // length of hexadecimal string
+   var hst = "";  // hexadecimal string
+   var cba;
+   cba = splitToArray(str, enc);
+   for (i=len=0; i<cba.length; i++) {
+      hst += hexch.charAt((cba[i] >> 4) & 0x0f).toString();
+      hst += hexch.charAt(cba[i] & 0x0f).toString();
+      len += 2;
+      if (flag && !(len%76)) hst += "\r\n";
+   }
+   return hst;
+}
+function doBase64(enc)
+{
+   with (document.form1){
+      var encod = encoding[1].checked ? UTF8 : encoding[2].checked ? BIG5 :
+         bigendian.checked ? UCBE : UCLE;
+      var bkln = breakline.checked;
+      if (enc == 1)
+         base64.value = base64Encode(plain.value, encod, bkln);
+      else
+         decode.value = base64Decode(base64.value, encod);
+   }
+}
+function doHexadecimal(enc)
+{
+   with (document.form1){
+      var encod = encoding[1].checked ? UTF8 : encoding[2].checked ? BIG5 :
+         bigendian.checked ? UCBE : UCLE;
+      var bkln = breakline.checked;
+      if (enc == 1)
+         base64.value = strToHex(plain.value, encod, bkln);
+      else
+         decode.value = hexToStr(base64.value, encod);
+   }
+}
+function doTransform(str,dir)
+{
+   var hst = "";  // output hexadecimal string
+   var cba = "";  // character code byte array
+   var ch;        // single character
+   var cbyte;     // byte count of the character
+   for (var i=0; ; ) {
+      ch = str.charCodeAt(i);
+      cbyte = 2;  // default
+      switch (dir) {
+      case UCLE: cba += toHex(ch & 0xff) + toHex((ch >>> 8) & 0xff);
+         break;
+      case UCBE: cba += toHex((ch >>> 8) & 0xff) + toHex(ch & 0xff);
+         break;
+      case UTF8:
+         if (ch & ~0x7f) {
+            ch = parseInt(encodeURI(str.charAt(i)).replace(/%/g,''),16);
+            if (ch & ~0x7ff) {
+               cba += toHex((ch >>> 16) & 0xff);
+               cbyte = 4;
+            }
+            cba += toHex((ch >>> 8) & 0xff);
+         }
+         else cbyte = 0;
+         cba += toHex(ch & 0xff);
+         break;
+      case BIG5: ch = big5code(str.charAt(i));
+         if (ch < 128) cbyte = 0;
+         else cba += toHex((ch >>> 8) & 0xff);
+         cba += toHex(ch & 0xff);
+         break;
+      }
+      hst += (ch < 32 ? "." : str.charAt(i)) + "        ".substring(0, cbyte + (ch & ~0x7f ? 1 : 2));
+      if (++i>=str.length) break;
+      cba += " ";
+   }
+   return hst + "\n" + cba;
+}
+function toHex(c)
+{
+   return hexch.charAt((c >>> 4) & 0x0f).toString() + hexch.charAt(c & 0x0f).toString();
+}
+function transform(clr)
+{
+   var psp,tmp;
+   document.getElementById("big5").innerText=(clr==1?"":doTransform(document.form1.ostr.value,BIG5));
+   document.getElementById("utf8").innerText=(clr==1?"":doTransform(document.form1.ostr.value,UTF8));
+   document.getElementById("ucle").innerText=(clr==1?"":doTransform(document.form1.ostr.value,UCLE));
+   document.getElementById("ucbe").innerText=tmp=(clr==1?"":doTransform(document.form1.ostr.value,UCBE));
+   if (clr==1) document.form1.reset();
+   if (clr==2) {
+      var cwdb=document.form1["cwdb"].value;
+      psp=tmp.split("\n")[1].split(" ");
+      for (var i=0; i<8; i++) {
+         cwdb=cwdb.replace("(@"+i+")",(i>=psp.length?"0000":psp[i]));
+      }
+      document.form1["cwdb"].value=cwdb.replace("(@name)",document.form1.ostr.value);
+   }
+}
+
+function DecodeUCS2(hex)
+{
+    var sms = new String();
+    var bin = h2b(hex);
+    while (bin.length > 0)
+        sms += String.fromCharCode((bin.shift() << 8) | bin.shift());
+    return sms;
+}
+function EncodeUCS2(msg)
+{
+    var sms = new Array();
+    var c = 0;
+    for (var i = 0; i < msg.length; i++) {
+        c = msg.charCodeAt(i);
+        sms.push(c >>> 8);
+        sms.push(c & 0xff);
+    }
+    return b2h(sms,document.form1.breakline.checked);
+}
+function Decode7bit(hex)
+{
+    var sms = new String();
+    var b = 0, c = 0, k = 0;
+    var bin = h2b(hex);
+    for (var i = 0; i < bin.length; i++) {
+        b = (c = b | bin[i] << (k = i % 7)) >> 7;
+        sms += String.fromCharCode(0x7f & c);
+        if (6 == k) {
+            sms += String.fromCharCode(b);
+            b = 0;
+    }   }
+    return sms;
+}
+function Encode7bit(msg)
+{
+    var sms = new Array();
+    var b = 0, c = 0, k = 0;
+    for (var i = 0; i < msg.length; i++) {
+        c = msg.charCodeAt(i);
+        if (0 != (k = i & 7))
+            sms.push(sms.pop() | ((c & ~(~0 << k)) << (8 - k)));
+        if (7 != k)
+            sms.push(c >> k);
+    }
+    return b2h(sms,document.form1.breakline.checked);
+}
+function h2b(h)
+{
+   h=h.replace(/[^0-9A-F]/ig,"");
+   var d="", b=new Array();
+   for (var i=0; i<h.length; i++) {
+      d += h.charAt(i).toString();
+      if (d.length==2) {
+         b.push(parseInt(d,16) & 0xff);
+         d="";
+      }
+   }
+   return b;
+}
+function b2h(b,k)
+{
+    var h="",len=0;
+    for (var j=0; j<b.length; j++) {
+        h += hexch.charAt((b[j] >> 4) & 0x0f).toString();
+        h += hexch.charAt(b[j] & 0x0f).toString();
+        if (!((len+=2) % 76) && k)
+            h += "\r\n";
+    }
+    return h;
+}
+</script>
+<script language="vbscript">
+Function big5code(b5char)
+   big5code=Asc(b5char) And &H7FFFFFFF
+End Function
+Function big5char(b5code)
+   big5char=Chr(b5code)
+End Function
+</script>
+</head>
+<body>
+<script language="javascript">document.write("<h4>"+document.title+"</h4>");</script>
+<form name=form1>
+原始文字: Encoding
+<input type=radio name=encoding value="unicode" checked />UCS2
+<input type=checkbox name=bigendian value="1" />BE
+<input type=radio name=encoding value="utf8" />UTF8
+<input type=radio name=encoding value="big5" />Big5
+<br />
+<textarea name=plain rows=4 cols=78 wrap=off>範例文字</textarea>
+<br />
+<input type=button value="轉成base64字串" onclick="javascript:doBase64(1)" />
+&nbsp;
+<input type=button value="轉成16進制" onclick="javascript:doHexadecimal(1)" />
+&nbsp;
+<input type=checkbox name=breakline />每76字換行
+&nbsp;
+<input type=button value="轉成7bit" onclick="javascript:base64.value=Encode7bit(plain.value)" />
+&nbsp;
+<input type=button value="轉成UCS2" onclick="javascript:base64.value=EncodeUCS2(plain.value)" />
+<br />
+<textarea name=base64 rows=4 cols=78 wrap=off></textarea>
+<br />
+<input type=button value="base64還原文字" onclick="javascript:doBase64(0)" />
+&nbsp;
+<input type=button value="16進制還原文字" onclick="javascript:doHexadecimal(0)" />
+&nbsp;
+<input type=button value="還原7bit" onclick="javascript:decode.value=Decode7bit(base64.value)" />
+&nbsp;
+<input type=button value="還原UCS2" onclick="javascript:decode.value=DecodeUCS2(base64.value)" />
+<br />
+<textarea name=decode rows=4 cols=78 wrap=off></textarea>
+<hr />
+Unicode/UTF8/BIG5轉碼16進制(原文對照)
+<br />
+<textarea name=ostr rows=4 cols=78 wrap=off>Unicode轉碼16進制</textarea>
+<br />
+<input type=button value=" 轉　碼 " onclick="javascript:transform(0)" />
+&nbsp;&nbsp;
+<input type=button value=" 改　名 " onclick="javascript:transform(2)" />
+&nbsp;&nbsp;
+<input type=button value=" 清　除 " onclick="javascript:transform(1)" />
+<pre>
+<span style="color:#336699;"><strong>Big5:</strong></span>
+<div id="big5"></div>
+<span style="color:#336699;"><strong>UTF8:</strong></span>
+<div id="utf8"></div>
+<span style="color:#336699;"><strong>UCS2(Little-Endian):</strong></span>
+<div id="ucle"></div>
+<span style="color:#336699;"><strong>UCS2(Big-Endian):</strong></span>
+<div id="ucbe"></div>
+<span style="color:#336699;"><strong>CW cheat.db</strong></span>
+<textarea name=cwdb rows=30 cols=50 wrap=off>
+_S ULJM-05500
+_G MONSTER HUNTER 2ND G
+_C0 Hunter Name:(@name)
+_L 0x21195E40 0x(@1)(@0)
+_L 0x21195E44 0x(@3)(@2)
+_L 0x21195E48 0x(@5)(@4)
+_L 0x21195E4C 0x(@7)(@6)
+_C0 Copy To Name Card
+_L 0x51195E40 0x00000010
+_L 0x011FD0F8 0x00000000
+_C0 Kitchen Cats Owner Name
+_L 0x51195E40 0x00000010
+_L 0x011FDCA0 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FE0E8 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF0EA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF15A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF1CA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF23A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF2AA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF3A6 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF416 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF486 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF4F6 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF566 0x00000000
+_C0 Fighting Cats Owner Name
+_L 0x51195E40 0x00000010
+_L 0x011FF5DA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF64A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF6BA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF72A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF79A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF80A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF87A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF8EA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF95A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FF9CA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FFA3A 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FFAAA 0x00000000
+_L 0x51195E40 0x00000010
+_L 0x011FFB1A 0x00000000
+</textarea>
+</pre>
+</form>
+</body>
+</html>
+<!-- ##### alan5666@gmail.com, 2009.6 ##### -->

@@ -1,0 +1,52 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<title>新增網頁1</title>
+</head>
+<body>
+<table border="0">
+	<tr>
+		<td>
+			<img id="qoo" src="image.jpg" onload="run();">
+		</td>
+	</tr>
+</table>
+<script>
+function run(){
+	create(document.getElementById("qoo"),8);
+}
+function create(img,size){
+	var outerDiv=document.createElement("div");
+	outerDiv.style.width=img.offsetWidth;
+	outerDiv.style.height=img.offsetHeight;
+	outerDiv.style.backgroundImage="url(" + img.src + ")";
+	var dst=img;
+	var top=0;
+	var left=0;
+	while (dst = dst.offsetParent) {
+        top += dst.offsetTop;
+        left += dst.offsetLeft;
+    }
+	for(var i=0;i<=img.offsetHeight;i+=size){
+		var br=document.createElement("br");
+		for(var j=0;j<=img.offsetWidth;j+=size){
+			var span=document.createElement("span");
+			span.style.position="absolute";
+			span.style.left=j+left+"px";
+			span.style.top=i+top+"px";
+			span.style.width=size+"px";
+			span.style.height=size+"px"; 
+			span.style.backgroundColor="#c0c0c0";
+			span.style.overflow="hidden";
+			span.onmouseover=function(){
+				outerDiv.removeChild(this);
+			};
+			outerDiv.appendChild(span);
+		}
+	}
+	img.parentNode.replaceChild(outerDiv,img);
+	
+}
+</script>
+</body>
+</html>

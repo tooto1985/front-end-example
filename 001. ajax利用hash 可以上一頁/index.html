@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script>
+        $(function() {
+
+
+            $(":button[value='下一步']").click(function () {
+                var n = location.hash;
+                if (n === "") {
+                    n = 1;
+                } else {
+                    n = parseInt(n.replace("#",""), 10) + 1;
+                }
+                getStep(n);
+            });
+            
+            $(":button[value='上一步']").click(function () {
+                var n = location.hash;
+                if (n === "") {
+                    n = 1;
+                } else {
+                    n = parseInt(n.replace("#", ""), 10) - 1;
+                }
+                if (n > 0) {
+
+                    getStep(n);
+                }
+            });
+
+
+            function getStep(n) {
+                if (n === "" || n === null || n === undefined) {
+                    n = 1;
+                }
+
+                $.ajax({
+                    url: "data.aspx",
+                    cache: false,
+                    data: {
+                        "datatype": n
+                    },
+                    dataType: "json",
+                    success: function (data) {
+                        $("#showlist").html(data.title + "<br/>");
+                        location.hash = "#" + data.step;
+                        
+
+
+                    }
+                });
+                
+            };
+
+            (function () {
+                $(window).on("hashchange", function() {
+                    var n = location.hash;
+                    if (n !== "") {
+                        n = parseInt(n.replace("#", ""), 10);
+                        getStep(n);
+                    }     
+                });
+
+                    
+
+
+            })(); // initializing            
+
+
+        });
+
+    </script>
+</head>
+<body>
+    <div id="showlist">
+        
+    </div>
+    
+    <input type="button" value="上一步"/>
+    
+    <input type="button" value="下一步"/>
+</body>
+</html>

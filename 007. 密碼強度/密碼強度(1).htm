@@ -1,0 +1,81 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="zh-tw">
+<meta http-equiv="Content-Type" content="text/html; charset=big5">
+<title>密碼強度測試</title>
+</head>
+
+<body>
+
+<form method="POST" action="--WEBBOT-SELF--">
+	<!--webbot bot="SaveResults" U-File="C:\Users\Linyitai\Desktop\_private\form_results.csv" S-Format="TEXT/CSV" S-Label-Fields="TRUE" -->
+	<table border="0" id="table2">
+		<tr>
+			<td>密碼強度測試：<input type="password" name="password" size="20" onkeyup="testpassword(this.value)"></td>
+			<td>
+	<table border="0" width="100" id="table3" cellspacing="0" cellpadding="0" align="right" style="border-style: solid; border-width: 1px" >
+		<tr>
+			<td width="20%" id="passwordlevel0">　</td>
+			<td width="20%" id="passwordlevel1">　</td>
+			<td width="20%" id="passwordlevel2" align="center" valign="middle"><div id="passwordstring"></div></td>
+			<td width="20%" id="passwordlevel3">　</td>
+			<td width="20%" id="passwordlevel4">　</td>
+		</tr>
+	</table>
+			</td>
+		</tr>
+	</table>
+	<p><input type="text" name="getcode" size="20" onkeyup="alert(this.value.charCodeAt(0));this.value='';"></p>
+</form>
+
+<script language="javascript" type="text/javascript">
+function testpassword(s) {
+	if(s.length>=1) { document.getElementById("passwordlevel0").bgColor="#ff0000";document.getElementById("passwordstring").innerText='差'; } else { document.getElementById("passwordlevel0").bgColor="";document.getElementById("passwordstring").innerText=''; }
+	if(s.length>=3 && gettexttype(1,s)>=1) { document.getElementById("passwordlevel1").bgColor="#ffcc00";document.getElementById("passwordstring").innerText='弱'; } else { document.getElementById("passwordlevel1").bgColor=""; }	
+	if(s.length>=5 && gettexttype(2,s)>=2) { document.getElementById("passwordlevel2").bgColor="#ffff00";document.getElementById("passwordstring").innerText='可'; } else { document.getElementById("passwordlevel2").bgColor=""; }
+	if(s.length>=7 && gettexttype(3,s)>=3) { document.getElementById("passwordlevel3").bgColor="#99cc00";document.getElementById("passwordstring").innerText='佳'; } else { document.getElementById("passwordlevel3").bgColor=""; }
+	if(s.length>=9 && gettexttype(0,s)>=4) { document.getElementById("passwordlevel4").bgColor="#008000";document.getElementById("passwordstring").innerText='強'; } else { document.getElementById("passwordlevel4").bgColor=""; }
+}
+
+function gettexttype(mode,s) {
+	var mode0=0;
+	var mode1=0;
+	var mode2=0;
+	var mode3=0;
+	//符號
+		for(var i=0;i<s.length;i++) {
+			if((s.charCodeAt(i)<65 || s.charCodeAt(i)>90) && (s.charCodeAt(i)<97 || s.charCodeAt(i)>122) && (s.charCodeAt(i)<48 || s.charCodeAt(i)>57)) {
+				mode0=1;
+			}
+		}
+	//數字
+		for(var i=0;i<s.length;i++) {
+			if(s.charCodeAt(i)>=48 && s.charCodeAt(i)<=57) {
+				mode1=1;
+			}
+		}
+	//大寫
+		for(var i=0;i<s.length;i++) {
+			if(s.charCodeAt(i)>=65 && s.charCodeAt(i)<=90) {
+				mode2=1;
+			}
+		}
+	//小寫
+		for(var i=0;i<s.length;i++) {
+			if(s.charCodeAt(i)>=97 && s.charCodeAt(i)<=122) {
+				mode3=1;
+			}
+		}
+	return mode0+mode1+mode2+mode3;
+}
+
+</script>
+
+
+<p>　</p>
+
+
+</body>
+
+</html>
